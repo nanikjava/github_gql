@@ -6,6 +6,7 @@ import (
 	"github_gql/pkg/etcd"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -46,10 +47,76 @@ func GithubGQL(client *clientv3.Client, token string) {
 	log.Println("New repo stored: ", ctrPut)
 }
 
+func GetPaginatedGithubData(pageNumber int64, start int64, end int64) []*Pagination {
+	d := []*Pagination{}
+
+	c, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{EtcdURL},
+		DialTimeout: 5 * time.Second,
+	})
+	if err != nil {
+		log.Fatal("Failed to connect to embedded embedEtcd:", err)
+	}
+	defer c.Close()
+	var resp *clientv3.GetResponse
+
+	resp, err = c.Get(context.TODO(), "",
+		clientv3.WithLimit(dataLimit*PageDisplayed),
+		clientv3.WithSort(clientv3.SortByCreateRevision, clientv3.SortAscend),
+		//clientv3.WithMinCreateRev(start),
+		//clientv3.WithMaxCreateRev(end),
+		clientv3.WithPrefix())
+
+	if err != nil {
+		log.Fatal("Failed to read data:", err)
+	}
+	defer c.Close()
+
+	// got a lot of data so we need to iterate in batches
+	totalPage := int64(len(resp.Kvs)) / int64(dataLimit)
+	var startIdx int64 = 0
+
+	//loop through the totalPage calculated
+	var l int64 = 0
+	for ; l < totalPage; l++ {
+		start := resp.Kvs[startIdx].CreateRevision
+
+		var endIdx int64 = 0
+		if int64(dataLimit)*(l+1) >= int64(len(resp.Kvs)) {
+			endIdx = int64(dataLimit)*(l+1) - 1
+		} else {
+			endIdx = int64(dataLimit) * (l + 1)
+		}
+		end := resp.Kvs[endIdx].CreateRevision
+		elem := &Pagination{
+			GithubData: nil,
+			PageNumber: l,
+			Start:      start,
+			End:        end,
+			Refetch:    false,
+		}
+		d = append(d, elem)
+
+		if l == pageNumber {
+			max := int64(int64(dataLimit) * (l + 1))
+			for r := startIdx; r < max; r++ {
+				elem.GithubData = append(elem.GithubData, GithubData{
+					Key:   string(resp.Kvs[r].Key),
+					Value: string(resp.Kvs[r].Value),
+				})
+			}
+		}
+		startIdx = dataLimit * (l + 1)
+	}
+
+	return d
+}
+
 // GetGithubData extract data from etcd using nextRevision as parameter
 // for the next sets of data
-func GetGithubData(nextRevision int64) *Data {
+func GetGithubData(origRevision int64, step string, start int64, end int64) *Data {
 	d := &Data{}
+	var revision = origRevision
 	c, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{EtcdURL},
 		DialTimeout: 5 * time.Second,
@@ -63,28 +130,56 @@ func GetGithubData(nextRevision int64) *Data {
 	//by the dataLimit parameter. Data are sorted by key and in ascending order.
 	//WithMinModRev is to indicate which revision number we want to get the data starting
 	//from, this is used as a pagination method
-	resp, err := c.Get(context.TODO(), "",
-		clientv3.WithLimit(dataLimit),
-		clientv3.WithSort(clientv3.SortByCreateRevision|clientv3.SortByKey, clientv3.SortAscend),
-		clientv3.WithMinModRev(nextRevision),
-		clientv3.WithPrefix())
-	if err != nil {
-		log.Fatal("Failed to read data:", err)
+	var resp *clientv3.GetResponse
+
+	if strings.ToLower(step) == "next" || strings.ToLower(step) == "reset" {
+		resp, err = c.Get(context.TODO(), "",
+			clientv3.WithLimit(dataLimit),
+			clientv3.WithSort(clientv3.SortByCreateRevision, clientv3.SortAscend),
+			clientv3.WithMinCreateRev(revision),
+			clientv3.WithPrefix())
+		if err != nil {
+			log.Fatal("Failed to read data:", err)
+		}
+	} else if strings.ToLower(step) == "prev" {
+		resp, err = c.Get(context.TODO(), "",
+			clientv3.WithLimit(dataLimit),
+			clientv3.WithSort(clientv3.SortByCreateRevision, clientv3.SortAscend),
+			clientv3.WithMinCreateRev(start),
+			clientv3.WithMaxCreateRev(end),
+			//clientv3.WithSort(clientv3.SortByCreateRevision, clientv3.SortDescend),
+			//clientv3.WithMaxCreateRev(revision),
+			clientv3.WithPrefix())
+		if err != nil {
+			log.Fatal("Failed to read data:", err)
+		}
 	}
 
 	for _, kv := range resp.Kvs {
 		d.GithubData = append(d.GithubData, GithubData{string(kv.Key), string(kv.Value)})
-		nextRevision = kv.CreateRevision
+		revision = kv.CreateRevision
 	}
 
 	//revision need to be added to the next number
 	//to avoid duplication of the same data being queried again
-	nextRevision++
-
-	d.NextRevision = nextRevision
+	d.NextRevision = revision
 
 	//More gives indication whether there will be more data available to
 	//be read
-	d.Next = resp.More
+	d.Next = true //resp.More
+
+	if strings.ToLower(step) == "reset" {
+		d.Start = resp.Kvs[0].CreateRevision
+		d.End = resp.Kvs[len(resp.Kvs)-1].CreateRevision
+	} else if strings.ToLower(step) == "next" && (origRevision == end) {
+		d.Start = start
+		d.End = end
+	} else if strings.ToLower(step) == "prev" {
+		d.End = start
+	} else {
+		d.Start = end
+		d.End = origRevision
+	}
+
 	return d
 }

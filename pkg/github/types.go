@@ -65,5 +65,17 @@ type GithubData struct {
 type Data struct {
 	GithubData   []GithubData
 	NextRevision int64
+	Start        int64
+	End          int64
 	Next         bool
+}
+
+const PageDisplayed = 10
+
+type Pagination struct {
+	GithubData []GithubData
+	PageNumber int64
+	Start      int64
+	End        int64
+	Refetch    bool // to fetch the next X number of pages
 }

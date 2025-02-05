@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .title }}</title>
+</head>
+<body>
+    <ul>
+        {{ range .data }}
+            {{ if  .GithubData }}
+                    {{ range .GithubData }}
+                        <li><a href="{{ .Key }}">{{ .Key }}</a>: {{ .Value }}</li>
+                    {{ end }}
+            {{ end }}
+        {{ end }}
+    </ul>
+
+     <ul>
+        {{ range .data }}
+            <a href="?pn={{ .PageNumber}}&start={{ .Start}}&end={{ .End}}">{{ .PageNumber }}</a>
+        {{ end }}
+    </ul>
+</body>
+</html>

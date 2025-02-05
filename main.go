@@ -39,7 +39,7 @@ func main() {
 	defer client.Close()
 
 	startWebServer()
-	startGithubProcess(client)
+	//startGithubProcess(client)
 
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGSEGV, syscall.SIGKILL)

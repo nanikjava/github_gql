@@ -14,10 +14,11 @@
     </ul>
     <ul>
 
-         <a href="/?NextRevision=0">Top</a>
-             {{ if .data.Next }}
-                      <a href="/?NextRevision={{ .data.NextRevision }}">Next</a>
-                 {{ end }}
+         <a href="/?NextRevision=0&Step=Reset&Start=0&End=0">Top</a>
+         {{ if .data.Next }}
+                  <a href="/?Step=Next&NextRevision={{ .data.NextRevision }}&Start={{ .data.Start }}&End={{ .data.End }}">Next</a>
+         {{ end }}
+           <a href="/?Step=Prev&Start={{ .data.Start }}&End={{ .data.End }}&NextRevision={{ .data.NextRevision }}">Prev</a>
     </ul>
 </body>
 </html>
