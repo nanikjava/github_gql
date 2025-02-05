@@ -61,10 +61,8 @@ func GetPaginatedGithubData(pageNumber int64, start int64, end int64) []*Paginat
 	var resp *clientv3.GetResponse
 
 	resp, err = c.Get(context.TODO(), "",
-		clientv3.WithLimit(dataLimit*PageDisplayed),
+		//clientv3.WithLimit(dataLimit*PageDisplayed),
 		clientv3.WithSort(clientv3.SortByCreateRevision, clientv3.SortAscend),
-		//clientv3.WithMinCreateRev(start),
-		//clientv3.WithMaxCreateRev(end),
 		clientv3.WithPrefix())
 
 	if err != nil {
@@ -75,7 +73,6 @@ func GetPaginatedGithubData(pageNumber int64, start int64, end int64) []*Paginat
 	// got a lot of data so we need to iterate in batches
 	totalPage := int64(len(resp.Kvs)) / int64(dataLimit)
 	var startIdx int64 = 0
-
 	//loop through the totalPage calculated
 	var l int64 = 0
 	for ; l < totalPage; l++ {
