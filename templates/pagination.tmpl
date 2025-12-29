@@ -184,14 +184,70 @@
 
         /* Fixed Pagination Styling */
         .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin: 30px 0;
-            padding: 20px 0;
+          display: flex;
+          gap: 10px;
+          overflow-x: auto;
+          scroll-behavior: smooth;
+          white-space: nowrap;
+          padding: 8px 4px;
+
+          /* hide scrollbar */
+          scrollbar-width: none;        /* Firefox */
         }
+
+        .pagination-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          max-width: 100%;
+          overflow: hidden;
+        }
+
+        .pagination::-webkit-scrollbar {
+          display: none;                /* Chrome/Safari */
+        }
+
+        .page-number {
+          min-width: 42px;
+          padding: 10px 14px;
+          font-size: 18px;              /* bigger numbers */
+          text-align: center;
+          text-decoration: none;
+          border-radius: 6px;
+          color: #333;
+          background: #f3f3f3;
+          flex-shrink: 0;
+        }
+
+        .page-number:hover {
+          background: #e0e0e0;
+        }
+
+        .page-number.active {
+          background: #111;
+          color: #fff;
+          font-weight: 600;
+        }
+
+        .page-arrow {
+          border: none;
+          background: #f3f3f3;
+          font-size: 22px;
+          padding: 6px 10px;
+          cursor: pointer;
+          border-radius: 6px;
+          flex-shrink: 0;
+        }
+
+        .page-arrow.jump-left,
+        .page-arrow.jump-right {
+          font-weight: 600;
+        }
+
+        .page-arrow:hover {
+          background: #ddd;
+        }
+
 
         .pagination a {
             display: inline-flex;
@@ -406,6 +462,11 @@
 
     <script>
     document.addEventListener("DOMContentLoaded", function () {
+        const saved = sessionStorage.getItem("paginationScrollLeft");
+        if (saved !== null) {
+          container.scrollLeft = parseInt(saved, 10);
+        }
+
         // Get the pn parameter from the URL
         function getQueryParam(name) {
             const urlParams = new URLSearchParams(window.location.search);
@@ -448,15 +509,86 @@
                 </tbody>
             </table>
         </div>
-        <div class="pagination">
+        <div class="pagination-wrapper">
+          <button class="page-arrow jump-left" aria-label="Jump to start">«</button>
+          <button class="page-arrow left" aria-label="Scroll left">‹</button>
+
+          <div class="pagination" id="pagination">
             {{ range .data }}
-                <a
-                  href="?pn={{ .PageNumber}}&start={{ .Start}}&end={{ .End}}"
-                  class="{{ if eq $.PageNumber .PageNumber }}active{{ end }}">
-                  {{ .PageNumber }}
-                </a>
+              <a
+                href="?pn={{ .PageNumber }}&start={{ .Start }}&end={{ .End }}"
+                class="page-number {{ if eq $.PageNumber .PageNumber }}active{{ end }}">
+                {{ .PageNumber }}
+              </a>
             {{ end }}
+          </div>
+
+          <button class="page-arrow right" aria-label="Scroll right">›</button>
+          <button class="page-arrow jump-right" aria-label="Jump to end">»</button>
         </div>
-    </div>
 </body>
 </html>
+
+<script>
+  const container = document.getElementById("pagination");
+
+    const SCROLL_STEP = 120;
+    const FAST_STEP = 20;
+    const FAST_INTERVAL = 10;
+
+    let scrollTimer = null;
+
+    function startScroll(direction) {
+      stopScroll();
+      scrollTimer = setInterval(() => {
+        container.scrollLeft += direction * FAST_STEP;
+      }, FAST_INTERVAL);
+    }
+
+    function stopScroll() {
+      if (scrollTimer) {
+        clearInterval(scrollTimer);
+        scrollTimer = null;
+      }
+    }
+
+    // Single-step arrows
+    document.querySelector(".left").addEventListener("click", () => {
+      container.scrollLeft -= SCROLL_STEP;
+    });
+
+    document.querySelector(".right").addEventListener("click", () => {
+      container.scrollLeft += SCROLL_STEP;
+    });
+
+    // Hold for fast scroll
+    document.querySelector(".left")
+      .addEventListener("mousedown", () => startScroll(-1));
+
+    document.querySelector(".right")
+      .addEventListener("mousedown", () => startScroll(1));
+
+    // Jump to start / end
+    document.querySelector(".jump-left").addEventListener("click", () => {
+      container.scrollLeft = 0;
+    });
+
+    document.querySelector(".jump-right").addEventListener("click", () => {
+      container.scrollLeft = container.scrollWidth;
+    });
+
+    // Stop on release
+    ["mouseup", "mouseleave"].forEach(evt => {
+      document.querySelector(".left").addEventListener(evt, stopScroll);
+      document.querySelector(".right").addEventListener(evt, stopScroll);
+    });
+
+    document.addEventListener("mouseup", stopScroll);
+
+    // Persist scroll position on page click
+    container.addEventListener("click", (e) => {
+      const link = e.target.closest("a.page-number");
+      if (!link) return;
+      sessionStorage.setItem("paginationScrollLeft", container.scrollLeft);
+    });
+</script>
