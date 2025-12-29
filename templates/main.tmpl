@@ -4,21 +4,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ .title }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f8f9fa;
+            color: #222;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.09);
+            padding: 32px 40px 36px 40px;
+            border-radius: 12px;
+        }
+        h1 {
+            font-size: 2.1rem;
+            color: #1a73e8;
+            margin-bottom: 24px;
+        }
+        ul.data-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 32px 0;
+        }
+        ul.data-list li {
+            background: #f1f3f5;
+            margin-bottom: 12px;
+            padding: 14px 18px;
+            border-radius: 7px;
+            font-size: 1.08rem;
+            word-break: break-word;
+            transition: background 0.2s;
+        }
+        ul.data-list li:hover {
+            background: #e9ecef;
+        }
+        ul.nav-list {
+            display: flex;
+            gap: 14px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        ul.nav-list a {
+            display: inline-block;
+            padding: 8px 19px;
+            background: #1a73e8;
+            color: #fff;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.15s;
+            box-shadow: 0 2px 8px rgba(26,115,232,0.08);
+        }
+        ul.nav-list a:hover {
+            background: #1668c1;
+        }
+    </style>
 </head>
 <body>
-    <h1>{{ .message }}</h1>
-    <ul>
-        {{ range .data.GithubData }}
-            <li><a href="{{ .Key }}">{{ .Key }}</a>: {{ .Value }}</li>
-        {{ end }}
-    </ul>
-    <ul>
-
-         <a href="/?NextRevision=0&Step=Reset&Start=0&End=0">Top</a>
-         {{ if .data.Next }}
-                  <a href="/?Step=Next&NextRevision={{ .data.NextRevision }}&Start={{ .data.Start }}&End={{ .data.End }}">Next</a>
-         {{ end }}
-           <a href="/?Step=Prev&Start={{ .data.Start }}&End={{ .data.End }}&NextRevision={{ .data.NextRevision }}">Prev</a>
-    </ul>
+    <div class="container">
+        <h1>{{ .message }}</h1>
+        <ul class="data-list">
+            {{ range .data.GithubData }}
+                <li>
+                    <a href="{{ .Key }}" target="_blank" rel="noopener">{{ .Key }}</a>: {{ .Value }}
+                </li>
+            {{ end }}
+        </ul>
+        <ul class="nav-list">
+            <li>
+                <a href="/?NextRevision=0&Step=Reset&Start=0&End=0">Top</a>
+            </li>
+            {{ if .data.Next }}
+            <li>
+                <a href="/?Step=Next&NextRevision={{ .data.NextRevision }}&Start={{ .data.Start }}&End={{ .data.End }}">Next</a>
+            </li>
+            {{ end }}
+            <li>
+                <a href="/?Step=Prev&Start={{ .data.Start }}&End={{ .data.End }}&NextRevision={{ .data.NextRevision }}">Prev</a>
+            </li>
+        </ul>
+    </div>
 </body>
 </html>

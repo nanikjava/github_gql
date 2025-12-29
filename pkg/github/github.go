@@ -2,17 +2,24 @@ package github
 
 import (
 	"context"
-	"github.com/machinebox/graphql"
 	"github_gql/pkg/etcd"
-	clientv3 "go.etcd.io/etcd/client/v3"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/machinebox/graphql"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
+
+func x(s string) {
+	log.Println(s)
+}
 
 // GithubGQL to query Github using GraphqQL
 func GithubGQL(client *clientv3.Client, token string) {
 	graphClient := graphql.NewClient(GithubURL)
+
+	graphClient.Log = x
 
 	req := graphql.NewRequest(GithubQuery)
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -22,7 +29,8 @@ func GithubGQL(client *clientv3.Client, token string) {
 	var resp *GithubResponse
 
 	if err := graphClient.Run(ctx, req, &resp); err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 
 	ctrPut := 0

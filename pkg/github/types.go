@@ -11,7 +11,7 @@ const EtcdURL = "127.0.0.1:7777"
 const GithubQuery = `
 	{
 	 search(
-		query: "language:Go stars:>100  sort:updated"
+		query: "language:Go stars:>50  sort:updated"
 		type: REPOSITORY
 		first: 100
 	 ) {

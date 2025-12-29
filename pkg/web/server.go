@@ -71,6 +71,6 @@ func StartServer() {
 		})
 	})
 
-	log.Println("Listening on port 8080")
-	r.Run(":8080")
+	log.Println("Listening on port 8100")
+	r.Run(":8100")
 }
