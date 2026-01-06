@@ -2,593 +2,260 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{{ .title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --bg-dark: #0f172a;
+            --surface: rgba(30, 41, 59, 0.8);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-heading: #f8fafc;
+            --text-desc: #94a3b8;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
         }
 
+        /* Use dvh (Dynamic Viewport Height) for mobile browser bars */
         html, body {
             width: 100%;
-            height: 100%;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            line-height: 1.6;
+            height: 100vh;
+            height: 100dvh;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top left, #1e1b4b, #0f172a);
+            color: var(--text-heading);
+            overflow: hidden;
         }
 
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Animated background elements */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
+        .main-app {
+            display: flex;
+            flex-direction: column;
             width: 100%;
             height: 100%;
-            background:
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 118, 117, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.2) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -1;
+            padding: 24px;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            box-shadow:
-                0 25px 50px rgba(0, 0, 0, 0.15),
-                0 0 0 1px rgba(255, 255, 255, 0.1);
-            margin-top: 40px;
-            margin-bottom: 40px;
-            animation: slideUp 0.8s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        h1 {
-            text-align: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            background-clip: text;
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+            background: linear-gradient(to right, #818cf8, #c084fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 3.2rem;
             font-weight: 800;
-            margin: 20px 0 50px 0;
-            letter-spacing: -0.02em;
-            position: relative;
         }
 
-        h1::after {
-            content: '';
-            position: absolute;
-            bottom: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border-radius: 2px;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
+        /* TABLE AREA - Critical fix for mobile scroll */
+        .table-area {
+            flex: 1;
+            min-height: 0; /* Allows container to shrink on mobile */
+            overflow: auto;
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
             border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-            margin-bottom: 40px;
-            background: white;
+            -webkit-overflow-scrolling: touch; /* Smooth mobile momentum scroll */
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-        }
-
-        th, td {
-            padding: 20px 24px;
-            text-align: left;
-            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
+            min-width: 500px; /* Prevents extreme squishing */
         }
 
         th {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            color: #475569;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-size: 0.95rem;
-            position: relative;
-        }
-
-        th::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tbody tr {
-            transition: all 0.3s ease;
-        }
-
-        tbody tr:hover {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-            transform: translateX(4px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-        }
-
-        tbody tr:hover td:first-child {
-            border-left: 4px solid #667eea;
-        }
-
-        a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        a::before {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            transition: width 0.3s ease;
-        }
-
-        a:hover::before {
-            width: 100%;
-        }
-
-        a:hover {
-            color: #764ba2;
-            transform: translateY(-1px);
-        }
-
-        /* Fixed Pagination Styling */
-        .pagination {
-          display: flex;
-          gap: 10px;
-          overflow-x: auto;
-          scroll-behavior: smooth;
-          white-space: nowrap;
-          padding: 8px 4px;
-
-          /* hide scrollbar */
-          scrollbar-width: none;        /* Firefox */
-        }
-
-        .pagination-wrapper {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          max-width: 100%;
-          overflow: hidden;
-        }
-
-        .pagination::-webkit-scrollbar {
-          display: none;                /* Chrome/Safari */
-        }
-
-        .page-number {
-          min-width: 42px;
-          padding: 10px 14px;
-          font-size: 18px;              /* bigger numbers */
-          text-align: center;
-          text-decoration: none;
-          border-radius: 6px;
-          color: #333;
-          background: #f3f3f3;
-          flex-shrink: 0;
-        }
-
-        .page-number:hover {
-          background: #e0e0e0;
-        }
-
-        .page-number.active {
-          background: #111;
-          color: #fff;
-          font-weight: 600;
-        }
-
-        .page-arrow {
-          border: none;
-          background: #f3f3f3;
-          font-size: 22px;
-          padding: 6px 10px;
-          cursor: pointer;
-          border-radius: 6px;
-          flex-shrink: 0;
-        }
-
-        .page-arrow.jump-left,
-        .page-arrow.jump-right {
-          font-weight: 600;
-        }
-
-        .page-arrow:hover {
-          background: #ddd;
-        }
-
-
-        .pagination a {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-            color: #64748b;
-            background: white;
-            border: 2px solid rgba(226, 232, 240, 0.8);
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            position: relative;
-            overflow: hidden;
-            text-align: center;
-            line-height: 1;
-        }
-
-        .pagination a::before {
-            content: '';
-            position: absolute;
+            position: sticky;
             top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s ease;
+            background: #1e293b;
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            z-index: 10;
         }
 
-        .pagination a:hover::before {
-            left: 100%;
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
         }
 
-        .pagination a:hover {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-color: transparent;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        .project-link {
+            color: #818cf8;
+            text-decoration: none;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 4px;
         }
 
-        .pagination a.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-color: transparent;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-            transform: scale(1.05);
+        .description-text {
+            color: var(--text-desc);
+            font-size: 0.9rem;
+            line-height: 1.5;
         }
 
-        /* Loading animation for table rows */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* PAGINATION SECTION */
+        footer {
+            padding: 16px 0 8px 0;
+            display: flex;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
-        tbody tr {
-            animation: fadeInUp 0.6s ease-out forwards;
+        .pager-container {
+            display: flex;
+            align-items: center;
+            background: var(--surface);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            gap: 6px;
+            max-width: 100%; /* Ensure it doesn't overflow screen */
         }
 
-        tbody tr:nth-child(1) { animation-delay: 0.1s; }
-        tbody tr:nth-child(2) { animation-delay: 0.15s; }
-        tbody tr:nth-child(3) { animation-delay: 0.2s; }
-        tbody tr:nth-child(4) { animation-delay: 0.25s; }
-        tbody tr:nth-child(5) { animation-delay: 0.3s; }
-
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-            .container {
-                margin: 20px;
-                padding: 16px;
-                border-radius: 16px;
-            }
-
-            h1 {
-                font-size: 2.2rem;
-                margin: 15px 0 30px 0;
-            }
-
-            th, td {
-                padding: 12px 16px;
-                font-size: 0.95rem;
-            }
-
-            th {
-                font-size: 0.85rem;
-            }
-
-            .pagination {
-                gap: 6px;
-                padding: 15px 0;
-            }
-
-            .pagination a {
-                width: 42px;
-                height: 42px;
-                font-size: 0.9rem;
-            }
-
-            tbody tr:hover {
-                transform: none;
-            }
-        }
-
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 1.8rem;
-            }
-
-            th, td {
-                padding: 10px 12px;
-                font-size: 0.9rem;
-            }
-
-            .pagination {
-                gap: 4px;
-                padding: 12px 0;
-            }
-
-            .pagination a {
-                width: 38px;
-                height: 38px;
-                font-size: 0.85rem;
-                border-radius: 8px;
-            }
-        }
-
-        /* Very small screens - stack pagination vertically if needed */
-        @media (max-width: 320px) {
-            .pagination {
-                flex-direction: row;
-                justify-content: center;
-                max-width: 100%;
-                overflow-x: auto;
-                padding: 10px 0;
-                gap: 3px;
-            }
-
-            .pagination a {
-                width: 36px;
-                height: 36px;
-                font-size: 0.8rem;
-                flex-shrink: 0;
-            }
-        }
-
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            .container {
-                background: rgba(30, 30, 30, 0.95);
-                color: #e2e8f0;
-            }
-
-            table {
-                background: #1e293b;
-            }
-
-            th {
-                background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
-                color: #d1d5db;
-            }
-
-            tbody tr:hover {
-                background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-            }
-
-            td {
-                color: #e2e8f0;
-                border-bottom-color: rgba(75, 85, 99, 0.5);
-            }
-
-            .pagination a {
-                background: #374151;
-                border-color: #4b5563;
-                color: #d1d5db;
-            }
-        }
-
-        /* Smooth scrolling */
-        html {
+        .page-strip {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            max-width: 40vw;
+            scrollbar-width: none;
             scroll-behavior: smooth;
         }
 
-        /* Custom scrollbar */
-        .table-wrapper::-webkit-scrollbar {
-            height: 8px;
+        .page-strip::-webkit-scrollbar { display: none; }
+
+        .page-btn {
+            min-width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            flex-shrink: 0;
         }
 
-        .table-wrapper::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 4px;
+        .page-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
+            color: white !important;
         }
 
-        .table-wrapper::-webkit-scrollbar-thumb {
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border-radius: 4px;
+        .nav-arrow {
+            background: #334155;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            white-space: nowrap;
         }
 
-        .table-wrapper::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(90deg, #5a6fd8, #6b46a3);
+        /* MOBILE ADJUSTMENTS */
+        @media (max-width: 600px) {
+            .main-app { padding: 12px; }
+            header h1 { font-size: 1.4rem; }
+            .page-strip { max-width: 30vw; }
+            .nav-arrow { padding: 8px 10px; }
+            th, td { padding: 12px; }
         }
     </style>
-
-    <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const saved = sessionStorage.getItem("paginationScrollLeft");
-        if (saved !== null) {
-          container.scrollLeft = parseInt(saved, 10);
-        }
-
-        // Get the pn parameter from the URL
-        function getQueryParam(name) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(name);
-        }
-
-        const currentPage = getQueryParam('pn');
-        if (currentPage) {
-            // Find all pagination links
-            document.querySelectorAll('.pagination a').forEach(function (a) {
-                // Remove any existing active class for safety
-                a.classList.remove('active');
-                // Match the page number (text or pn param in href)
-                // We assume the page number is shown as the text of the link
-                if (a.textContent.trim() === currentPage) {
-                    a.classList.add('active');
-                }
-            });
-        }
-    });
-    </script>
-
 </head>
 <body>
-    <div class="container">
-        <h1>{{ .title }}</h1>
-        <div class="table-wrapper">
+
+    <div class="main-app">
+        <header>
+            <h1>{{ .title }}</h1>
+        </header>
+
+        <div class="table-area">
             <table>
+                <thead>
+                    <tr>
+                        <th style="width: 35%;">Project</th>
+                        <th style="width: 65%;">Description</th>
+                    </tr>
+                </thead>
                 <tbody>
                     {{ range .data }}
-                        {{ if .GithubData }}
-                            {{ range .GithubData }}
-                                <tr>
-                                    <td><a target="_blank" href="{{ .Key }}">{{ .Key }}</a></td>
-                                    <td>{{ .Value }}</td>
-                                </tr>
-                            {{ end }}
+                        {{ range .GithubData }}
+                        <tr>
+                            <td>
+                                <a href="{{ .Key }}" target="_blank" class="project-link">
+                                    <script>document.write("{{ .Key }}".split('/').pop());</script>
+                                </a>
+                            </td>
+                            <td>
+                                <div class="description-text">{{ .Value }}</div>
+                            </td>
+                        </tr>
                         {{ end }}
                     {{ end }}
                 </tbody>
             </table>
         </div>
-        <div class="pagination-wrapper">
-          <button class="page-arrow jump-left" aria-label="Jump to start">«</button>
-          <button class="page-arrow left" aria-label="Scroll left">‹</button>
 
-          <div class="pagination" id="pagination">
-            {{ range .data }}
-              <a
-                href="?pn={{ .PageNumber }}&start={{ .Start }}&end={{ .End }}"
-                class="page-number {{ if eq $.PageNumber .PageNumber }}active{{ end }}">
-                {{ .PageNumber }}
-              </a>
-            {{ end }}
-          </div>
+        <footer>
+            <div class="pager-container">
+                <button class="nav-arrow" onclick="jumpTo(0)">First</button>
+                <button class="nav-arrow" onclick="scrollStrip(-150)">‹</button>
 
-          <button class="page-arrow right" aria-label="Scroll right">›</button>
-          <button class="page-arrow jump-right" aria-label="Jump to end">»</button>
-        </div>
+                <div class="page-strip" id="pager">
+                    {{ range .data }}
+                    <a href="?pn={{ .PageNumber }}"
+                       data-pn="{{ .PageNumber }}"
+                       class="page-btn {{ if eq $.PageNumber .PageNumber }}active{{ end }}">
+                        {{ .PageNumber }}
+                    </a>
+                    {{ end }}
+                </div>
+
+                <button class="nav-arrow" onclick="scrollStrip(150)">›</button>
+                <button class="nav-arrow" onclick="jumpTo(1)">Last</button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const pager = document.getElementById('pager');
+
+        function scrollStrip(val) {
+            pager.style.scrollBehavior = 'smooth';
+            pager.scrollLeft += val;
+        }
+
+        function jumpTo(pos) {
+            pager.style.scrollBehavior = 'auto';
+            if (pos === 0) pager.scrollLeft = 0;
+            else pager.scrollLeft = pager.scrollWidth;
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentPage = urlParams.get('pn');
+
+            if (currentPage) {
+                document.querySelectorAll('.page-btn').forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('data-pn') === currentPage);
+                });
+            }
+
+            const activePage = document.querySelector('.page-btn.active');
+            if (activePage) {
+                pager.style.scrollBehavior = 'auto';
+                activePage.scrollIntoView({ inline: 'center' });
+            }
+        });
+    </script>
 </body>
 </html>
-
-<script>
-  const container = document.getElementById("pagination");
-
-    const SCROLL_STEP = 120;
-    const FAST_STEP = 20;
-    const FAST_INTERVAL = 10;
-
-    let scrollTimer = null;
-
-    function startScroll(direction) {
-      stopScroll();
-      scrollTimer = setInterval(() => {
-        container.scrollLeft += direction * FAST_STEP;
-      }, FAST_INTERVAL);
-    }
-
-    function stopScroll() {
-      if (scrollTimer) {
-        clearInterval(scrollTimer);
-        scrollTimer = null;
-      }
-    }
-
-    // Single-step arrows
-    document.querySelector(".left").addEventListener("click", () => {
-      container.scrollLeft -= SCROLL_STEP;
-    });
-
-    document.querySelector(".right").addEventListener("click", () => {
-      container.scrollLeft += SCROLL_STEP;
-    });
-
-    // Hold for fast scroll
-    document.querySelector(".left")
-      .addEventListener("mousedown", () => startScroll(-1));
-
-    document.querySelector(".right")
-      .addEventListener("mousedown", () => startScroll(1));
-
-    // Jump to start / end
-    document.querySelector(".jump-left").addEventListener("click", () => {
-      container.scrollLeft = 0;
-    });
-
-    document.querySelector(".jump-right").addEventListener("click", () => {
-      container.scrollLeft = container.scrollWidth;
-    });
-
-    // Stop on release
-    ["mouseup", "mouseleave"].forEach(evt => {
-      document.querySelector(".left").addEventListener(evt, stopScroll);
-      document.querySelector(".right").addEventListener(evt, stopScroll);
-    });
-
-    document.addEventListener("mouseup", stopScroll);
-
-    // Persist scroll position on page click
-    container.addEventListener("click", (e) => {
-      const link = e.target.closest("a.page-number");
-      if (!link) return;
-      sessionStorage.setItem("paginationScrollLeft", container.scrollLeft);
-    });
-</script>
